@@ -20,23 +20,22 @@ namespace LegacyApp
                 return false;
             }
             
-            var clientRepository = new ClientRepository();
-            var client = clientRepository.GetById(clientId);
+            var clientType = GetClientType(clientId);
 
             var user = new User
             {
-                Client = client,
+                Client = new Client { Type = clientType },
                 DateOfBirth = dateOfBirth,
                 EmailAddress = email,
                 FirstName = firstName,
                 LastName = lastName
             };
 
-            if (client.Type == "VeryImportantClient")
+            if (clientType == "VeryImportantClient")
             {
                 user.HasCreditLimit = false;
             }
-            else if (client.Type == "ImportantClient")
+            else if (clientType == "ImportantClient")
             {
                 using (var userCreditService = new UserCreditService())
                 {
@@ -68,10 +67,12 @@ namespace LegacyApp
         {
             return string.IsNullOrEmpty(name);
         }
+
         private bool IsEmailValid(string email)
         {
             return email.Contains("@") && email.Contains(".");
         }
+
         private bool IsUserOldEnough(DateTime dateOfBirth)
         {
             var now = DateTime.Now;
@@ -80,6 +81,13 @@ namespace LegacyApp
                 age--;
 
             return age >= 21;
+        }
+
+        private string GetClientType(int clientId)
+        {
+            var clientRepository = new ClientRepository();
+            var client = clientRepository.GetById(clientId);
+            return client.Type;
         }
     }
 
