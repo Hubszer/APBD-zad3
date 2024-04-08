@@ -6,25 +6,20 @@ namespace LegacyApp
     {
         public bool AddUser(string firstName, string lastName, string email, DateTime dateOfBirth, int clientId)
         {
-            if (string.IsNullOrEmpty(firstName) || string.IsNullOrEmpty(lastName))
+            if (IsNameEmpty(firstName) || IsNameEmpty(lastName))
+            {
+                return false;
+            }
+            if (!IsEmailValid(email))
             {
                 return false;
             }
 
-            if (!email.Contains("@") && !email.Contains("."))
+            if (!IsUserOldEnough(dateOfBirth))
             {
                 return false;
             }
-
-            var now = DateTime.Now;
-            int age = now.Year - dateOfBirth.Year;
-            if (now.Month < dateOfBirth.Month || (now.Month == dateOfBirth.Month && now.Day < dateOfBirth.Day)) age--;
-
-            if (age < 21)
-            {
-                return false;
-            }
-
+            
             var clientRepository = new ClientRepository();
             var client = clientRepository.GetById(clientId);
 
@@ -68,5 +63,24 @@ namespace LegacyApp
             UserDataAccess.AddUser(user);
             return true;
         }
+
+        private bool IsNameEmpty(string name)
+        {
+            return string.IsNullOrEmpty(name);
+        }
+        private bool IsEmailValid(string email)
+        {
+            return email.Contains("@") && email.Contains(".");
+        }
+        private bool IsUserOldEnough(DateTime dateOfBirth)
+        {
+            var now = DateTime.Now;
+            int age = now.Year - dateOfBirth.Year;
+            if (now.Month < dateOfBirth.Month || (now.Month == dateOfBirth.Month && now.Day < dateOfBirth.Day))
+                age--;
+
+            return age >= 21;
+        }
     }
+
 }
